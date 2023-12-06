@@ -1,18 +1,29 @@
-// users.module.ts
-
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import {
+  MongooseModule,
+  MongooseModuleOptions,
+  MongooseOptionsFactory,
+} from '@nestjs/mongoose';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User, UserSchema } from '../schemas/user.schema';
-import { mongoConfig } from '../config/mongo.config';
+
+class MongooseConfigService implements MongooseOptionsFactory {
+  createMongooseOptions(): MongooseModuleOptions {
+    return {
+      uri: 'mongodb+srv://jacopomariniwd:uGGvhMkqDbMiDI0d@cluster0.uf5qt3t.mongodb.net/users',
+    };
+  }
+}
 
 @Module({
   imports: [
-    MongooseModule.forRoot(mongoConfig.uri),
+    MongooseModule.forRootAsync({
+      useClass: MongooseConfigService,
+    }),
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, MongooseConfigService],
 })
 export class UsersModule {}
